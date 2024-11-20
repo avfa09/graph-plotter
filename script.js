@@ -1,40 +1,66 @@
+// Plotting fonksiyonu
 function plotGraph() {
-    let equation = document.getElementById("equation").value;
+    const equation = document.getElementById("equation").value.trim();
 
-    // Canvas ve context oluştur
-    const canvas = document.getElementById("graphCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = 500;
-    canvas.height = 500;
-
-    // Grafiğin merkezini belirle
-    const originX = canvas.width / 2;
-    const originY = canvas.height / 2;
-    const scale = 20;  // Ölçek faktörü
-
-    // Math.js kullanarak fonksiyonu çözme
-    let expr = math.parse(equation);
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  // Temizle
-
-    // Eksenleri çiz
-    ctx.beginPath();
-    ctx.moveTo(0, originY);
-    ctx.lineTo(canvas.width, originY);
-    ctx.moveTo(originX, 0);
-    ctx.lineTo(originX, canvas.height);
-    ctx.strokeStyle = "#000";
-    ctx.stroke();
-
-    // Fonksiyonu çiz
-    ctx.beginPath();
-    ctx.moveTo(0, originY - expr.evaluate({x: -10}) * scale);
-
-    for (let x = -10; x < 10; x += 0.1) {
-        let y = expr.evaluate({x: x});
-        ctx.lineTo(originX + x * scale, originY - y * scale);
+    if (!equation) {
+        alert("Please enter a valid equation!");
+        return;
     }
 
-    ctx.strokeStyle = "#FF0000";
-    ctx.stroke();
+    // Grafik alanını temizleyelim
+    document.getElementById("graph").innerHTML = '<canvas id="graphCanvas" width="400" height="400"></canvas>';
+    
+    // Grafik için Canvas elementini alalım
+    const ctx = document.getElementById('graphCanvas').getContext('2d');
+
+    // Kullanıcının girdiği denklemi çözmek için Math.js kullanabiliriz
+    // Basit bir örnek olarak, y = x^2 denklemine yönelik bir işlevsel çizim yapacağız
+
+    const dataPoints = [];
+    const xRange = 10; // -10 ile 10 arasındaki x değerlerini kullanacağız
+    const step = 0.1; // x aralığını adım adım artıracağız
+
+    // x ve y değerlerini hesapla ve veri kümesini oluştur
+    for (let x = -xRange; x <= xRange; x += step) {
+        let y = evaluateEquation(equation, x);
+        dataPoints.push({ x: x, y: y });
+    }
+
+    // Chart.js ile grafik çizim
+    new Chart(ctx, {
+        type: 'line', // Çizgi grafiği
+        data: {
+            datasets: [{
+                label: equation, // Denklemi başlık olarak kullan
+                data: dataPoints,
+                fill: false, // Arka planı doldurma
+                borderColor: 'rgba(75, 192, 192, 1)', // Çizgi rengi
+                tension: 0.1 // Çizgi eğriliği
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'linear', // x ekseni sayısal olacak
+                    position: 'bottom'
+                },
+                y: {
+                    beginAtZero: false // y ekseninin sıfırdan başlamasını istemiyoruz
+                }
+            }
+        }
+    });
 }
+
+// Kullanıcıdan alınan denklemi çözmek için basit bir fonksiyon (örnek: y = x^2)
+function evaluateEquation(equation, x) {
+    try {
+        // Dinamik olarak bir denklemi çözmek için eval fonksiyonu kullanılabilir
+        // Kullanıcının girdiği denklemde x değişkeni bulunacak
+        return Function('x', `return ${equation}`).call(this, x);
+    } catch (e) {
+        alert('Invalid equation format! Please use a valid mathematical equation.');
+        return 0; // Hata durumunda y = 0 döndürüyoruz
+    }
+}
+
