@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Graph Plotter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Function Graph Plotter</h1>
+        <label for="equation">Enter Equation (e.g., x^2 + 2x + 1):</label>
+        <input type="text" id="equation" placeholder="Enter your equation">
+        <button onclick="plotGraph()">Plot Graph</button>
+        <canvas id="graphCanvas"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
