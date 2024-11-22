@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Plotter</title>
-    <link rel="stylesheet" href="styles.css"> <!-- CSS dosyasını dahil et -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>Fonksiyon Çizici</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the Graph Plotter</h1>
-        <p>This is a simple page for graph plotting.</p>
+    <h1>Fonksiyon Çizici</h1>
+    <label for="functionInput">Fonksiyon (ör: Math.sin(x), x*x):</label>
+    <input type="text" id="functionInput" value="Math.sin(x)">
+    <button id="plotButton">Çiz</button>
+    <canvas id="graphCanvas" width="600" height="400"></canvas>
 
-        <!-- Kullanıcının denklemi gireceği alan (örnek form) -->
-        <label for="equation">Enter an equation:</label>
-        <input type="text" id="equation" placeholder="e.g. y = x^2">
-
-        <!-- Butonlar -->
-        <button onclick="plotGraph()">Plot Graph</button>
-
-        <!-- Grafiği yerleştireceğimiz alan -->
-        <div id="graph"></div>
-    </div>
-
-    <script src="script.js"></script> <!-- JavaScript dosyasını dahil et -->
+    <script src="graph.js"></script>
 </body>
 </html>
+
+
 
