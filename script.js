@@ -1,66 +1,70 @@
-// Plotting fonksiyonu
-function plotGraph() {
-    const equation = document.getElementById("equation").value.trim();
+// Çizim İşlemi
+function drawGraph(funcStr, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
 
-    if (!equation) {
-        alert("Please enter a valid equation!");
-        return;
-    }
+    // Koordinat Sistemi Ayarları
+    const xMin = -10;
+    const xMax = 10;
+    const yMin = -10;
+    const yMax = 10;
+    const stepSize = 0.01;
 
-    // Grafik alanını temizleyelim
-    document.getElementById("graph").innerHTML = '<canvas id="graphCanvas" width="400" height="400"></canvas>';
-    
-    // Grafik için Canvas elementini alalım
-    const ctx = document.getElementById('graphCanvas').getContext('2d');
+    // Çizim Alanını Temizleme
+    ctx.clearRect(0, 0, width, height);
 
-    // Kullanıcının girdiği denklemi çözmek için Math.js kullanabiliriz
-    // Basit bir örnek olarak, y = x^2 denklemine yönelik bir işlevsel çizim yapacağız
+    // Koordinatları Ortalamak için Dönüştürme Fonksiyonları
+    const scaleX = width / (xMax - xMin);
+    const scaleY = height / (yMax - yMin);
+    const transformX = (x) => (x - xMin) * scaleX;
+    const transformY = (y) => height - (y - yMin) * scaleY;
 
-    const dataPoints = [];
-    const xRange = 10; // -10 ile 10 arasındaki x değerlerini kullanacağız
-    const step = 0.1; // x aralığını adım adım artıracağız
+    // Fonksiyon Çizme
+    ctx.beginPath();
+    ctx.strokeStyle = 'blue';
+    ctx.lineWidth = 2;
 
-    // x ve y değerlerini hesapla ve veri kümesini oluştur
-    for (let x = -xRange; x <= xRange; x += step) {
-        let y = evaluateEquation(equation, x);
-        dataPoints.push({ x: x, y: y });
-    }
-
-    // Chart.js ile grafik çizim
-    new Chart(ctx, {
-        type: 'line', // Çizgi grafiği
-        data: {
-            datasets: [{
-                label: equation, // Denklemi başlık olarak kullan
-                data: dataPoints,
-                fill: false, // Arka planı doldurma
-                borderColor: 'rgba(75, 192, 192, 1)', // Çizgi rengi
-                tension: 0.1 // Çizgi eğriliği
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'linear', // x ekseni sayısal olacak
-                    position: 'bottom'
-                },
-                y: {
-                    beginAtZero: false // y ekseninin sıfırdan başlamasını istemiyoruz
-                }
+    let firstPoint = true;
+    for (let x = xMin; x <= xMax; x += stepSize) {
+        try {
+            const y = eval(funcStr); // Kullanıcı fonksiyonunu değerlendirme
+            if (y < yMin || y > yMax) continue; // Görünürlük sınırlarını kontrol et
+            const px = transformX(x);
+            const py = transformY(y);
+            if (firstPoint) {
+                ctx.moveTo(px, py);
+                firstPoint = false;
+            } else {
+                ctx.lineTo(px, py);
             }
+        } catch (e) {
+            console.error(`Hata: ${e.message} (x = ${x})`);
         }
-    });
+    }
+    ctx.stroke();
+
+    // Eksenleri Çizme
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+
+    // Yatay Eksen
+    ctx.moveTo(transformX(xMin), transformY(0));
+    ctx.lineTo(transformX(xMax), transformY(0));
+    // Dikey Eksen
+    ctx.moveTo(transformX(0), transformY(yMin));
+    ctx.lineTo(transformX(0), transformY(yMax));
+    ctx.stroke();
 }
 
-// Kullanıcıdan alınan denklemi çözmek için basit bir fonksiyon (örnek: y = x^2)
-function evaluateEquation(equation, x) {
-    try {
-        // Dinamik olarak bir denklemi çözmek için eval fonksiyonu kullanılabilir
-        // Kullanıcının girdiği denklemde x değişkeni bulunacak
-        return Function('x', `return ${equation}`).call(this, x);
-    } catch (e) {
-        alert('Invalid equation format! Please use a valid mathematical equation.');
-        return 0; // Hata durumunda y = 0 döndürüyoruz
-    }
-}
+// Kullanıcı Etkileşimi
+document.getElementById('plotButton').addEventListener('click', () => {
+    const funcInput = document.getElementById('functionInput').value;
+    drawGraph(funcInput, 'graphCanvas');
+});
+
+// Başlangıçta Varsayılan Grafiği Çiz
+drawGraph('Math.sin(x)', 'graphCanvas');
 
