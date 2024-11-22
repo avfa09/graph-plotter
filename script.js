@@ -1,72 +1,65 @@
-function drawGraph(funcStr, canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+// Canvas ve Grafik Çizimi için JavaScript
 
-    const xMin = -10;
-    const xMax = 10;
-    const yMin = -10;
-    const yMax = 10;
-    const stepSize = 0.01;
+function drawGraph() {
+    const equation = document.getElementById('equation').value;
 
-    ctx.clearRect(0, 0, width, height);
-
-    const scaleX = width / (xMax - xMin);
-    const scaleY = height / (yMax - yMin);
-    const transformX = (x) => (x - xMin) * scaleX;
-    const transformY = (y) => height - (y - yMin) * scaleY;
-
-    // Fonksiyon Çizimi
-    ctx.beginPath();
-    ctx.strokeStyle = 'blue';
-    ctx.lineWidth = 2;
-
-    let firstPoint = true;
-    for (let x = xMin; x <= xMax; x += stepSize) {
-        try {
-            // Kullanıcı girdisini güvenli hale getir
-            const sanitizedFuncStr = funcStr.replace(/([a-zA-Z]+)\(/g, 'Math.$1(');
-            const y = eval(sanitizedFuncStr);
-
-            if (!isFinite(y) || y < yMin || y > yMax) continue;
-
-            const px = transformX(x);
-            const py = transformY(y);
-
-            if (firstPoint) {
-                ctx.moveTo(px, py);
-                firstPoint = false;
-            } else {
-                ctx.lineTo(px, py);
-            }
-        } catch (e) {
-            console.error(`Hata: ${e.message} (x = ${x})`);
-        }
+    // Eğer kullanıcı denklemi boş bırakmışsa, herhangi bir işlem yapma
+    if (!equation) {
+        alert("Lütfen bir denklem girin!");
+        return;
     }
-    ctx.stroke();
 
-    // Eksenleri Çizme
+    // Canvas'ı seç
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Canvas'ı temizle
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Canvas Orta Noktası
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    // Ölçekleme faktörü
+    const scale = 20;
+    
+    // X ve Y eksenlerinin başlangıç noktasını çiz
+    drawAxes(ctx, centerX, centerY);
+
+    // Matematiksel denklemi çöz ve grafiği çiz
+    try {
+        // Fonksiyon oluşturuluyor
+        const fn = math.compile(equation);
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY); // Başlangıç noktası
+
+        // X değerini -10 ile 10 arasında değiştir
+        for (let x = -canvas.width / 2; x <= canvas.width / 2; x++) {
+            const result = fn.evaluate({ x: x / scale });
+            const y = -result * scale;  // Y değeri ters yönde çizilsin
+
+            // Canvas'a noktayı çiz
+            ctx.lineTo(centerX + x, centerY + y);
+        }
+        
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    } catch (error) {
+        alert("Geçersiz denklem! Lütfen tekrar deneyin.");
+    }
+}
+
+// Eksenleri çizme fonksiyonu
+function drawAxes(ctx, centerX, centerY) {
     ctx.beginPath();
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 1;
-
-    ctx.moveTo(transformX(xMin), transformY(0));
-    ctx.lineTo(transformX(xMax), transformY(0));
-    ctx.moveTo(transformX(0), transformY(yMin));
-    ctx.lineTo(transformX(0), transformY(yMax));
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(centerX * 2, centerY);
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, centerY * 2);
+    ctx.strokeStyle = '#000';
     ctx.stroke();
 }
 
-document.getElementById('plotButton').addEventListener('click', () => {
-    const funcInput = document.getElementById('functionInput').value;
-    drawGraph(funcInput, 'graphCanvas');
-});
-
-// Varsayılan Fonksiyon
-try {
-    drawGraph('Math.sin(x)', 'graphCanvas');
-} catch (e) {
-    console.error('Varsayılan grafik çizilemedi:', e.message);
-}
 
